@@ -213,10 +213,10 @@ public class MigrateCustomModulesCommandHandler(
                             switch (await importer.ImportAsync(umtModel))
                             {
                                 case { Success: false } result:
-                                {
-                                    logger.LogError("Failed to import: {Exception}, {ValidationResults}", result.Exception, JsonConvert.SerializeObject(result.ModelValidationResults));
-                                    break;
-                                }
+                                    {
+                                        logger.LogError("Failed to import: {Exception}, {ValidationResults}", result.Exception, JsonConvert.SerializeObject(result.ModelValidationResults));
+                                        break;
+                                    }
                                 default:
                                     break;
                             }
@@ -418,9 +418,7 @@ public class MigrateCustomModulesCommandHandler(
         {
             protocol.FetchedSource(k12CmsResource);
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            var xbkResource = ResourceInfoProvider.ProviderObject.Get(k12CmsResource.ResourceGUID);
-#pragma warning restore CS0618 // Type or member is obsolete
+            var xbkResource = ResourceInfo.Provider.Get().WhereEquals(nameof(ResourceInfo.ResourceGUID), k12CmsResource.ResourceGUID).FirstOrDefault();
 
             protocol.FetchedTarget(xbkResource);
 
@@ -481,9 +479,7 @@ public class MigrateCustomModulesCommandHandler(
                     (var resourceInfo, bool newInstance) = mapped;
                     ArgumentNullException.ThrowIfNull(resourceInfo, nameof(resourceInfo));
 
-#pragma warning disable CS0618 // Type or member is obsolete
-                    ResourceInfoProvider.ProviderObject.Set(resourceInfo);
-#pragma warning restore CS0618 // Type or member is obsolete
+                    ResourceInfo.Provider.Set(resourceInfo);
 
                     protocol.Success(k12CmsResource, resourceInfo, mapped);
                     logger.LogEntitySetAction(newInstance, resourceInfo);

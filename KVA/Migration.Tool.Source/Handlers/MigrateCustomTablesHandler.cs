@@ -59,9 +59,7 @@ public class MigrateCustomTablesHandler(
 
         const string resourceName = "customtables";
         var resourceGuid = GuidV5.NewNameBased(resourceGuidNamespace, resourceName);
-#pragma warning disable CS0618 // Type or member is obsolete
-        var resourceInfo = await ResourceInfoProvider.ProviderObject.GetAsync(resourceGuid);
-#pragma warning restore CS0618 // Type or member is obsolete
+        var resourceInfo = ResourceInfo.Provider.Get().WhereEquals(nameof(ResourceInfo.ResourceGUID), resourceGuid).FirstOrDefault();
         if (resourceInfo == null)
         {
             resourceInfo = new ResourceInfo
@@ -73,9 +71,7 @@ public class MigrateCustomTablesHandler(
                 ResourceLastModified = default,
                 ResourceIsInDevelopment = false
             };
-#pragma warning disable CS0618 // Type or member is obsolete
-            ResourceInfoProvider.ProviderObject.Set(resourceInfo);
-#pragma warning restore CS0618 // Type or member is obsolete
+            ResourceInfo.Provider.Set(resourceInfo);
         }
 
         customTableResource = resourceInfo;
@@ -222,21 +218,21 @@ public class MigrateCustomTablesHandler(
                         switch (await importer.ImportAsync(umtModel))
                         {
                             case { Success: false } result:
-                            {
-                                logger.LogError("Failed to import: {Exception}, {ValidationResults}", result.Exception, JsonConvert.SerializeObject(result.ModelValidationResults));
-                                break;
-                            }
+                                {
+                                    logger.LogError("Failed to import: {Exception}, {ValidationResults}", result.Exception, JsonConvert.SerializeObject(result.ModelValidationResults));
+                                    break;
+                                }
                             case { Success: true, Imported: ContentItemCommonDataInfo ccid }:
-                            {
-                                commonDataInfos.Add(ccid);
-                                Debug.Assert(ccid.ContentItemCommonDataContentLanguageID != 0, "ccid.ContentItemCommonDataContentLanguageID != 0");
-                                break;
-                            }
+                                {
+                                    commonDataInfos.Add(ccid);
+                                    Debug.Assert(ccid.ContentItemCommonDataContentLanguageID != 0, "ccid.ContentItemCommonDataContentLanguageID != 0");
+                                    break;
+                                }
                             case { Success: true, Imported: ContentItemLanguageMetadataInfo cclm }:
-                            {
-                                Debug.Assert(cclm.ContentItemLanguageMetadataContentLanguageID != 0, "ccid.ContentItemCommonDataContentLanguageID != 0");
-                                break;
-                            }
+                                {
+                                    Debug.Assert(cclm.ContentItemLanguageMetadataContentLanguageID != 0, "ccid.ContentItemCommonDataContentLanguageID != 0");
+                                    break;
+                                }
                             default:
                                 break;
                         }
